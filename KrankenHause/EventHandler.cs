@@ -31,7 +31,7 @@ namespace KrankenHause
         {
             TimeSpan = DateTime.Now - SimStarts;
             Console.WriteLine($"Simulation ended!" +
-                $"\nTime: {TimeSpan.ToString(@"hh\:mm\:ss")}\nPress any key to exit");
+                $"\nTime: {TimeSpan.ToString(@"hh\:mm\:ss")}");
         }
 
         public static void StopOrRun(bool willRun)
