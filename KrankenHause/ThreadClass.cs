@@ -11,14 +11,16 @@ namespace KrankenHause
     {
         private const int MaxAllowedIVARows = 5;
         private const int MaxAllowedSanatoriumRows = 10;
-        private const int ExpectedToBeAlot = 30;
-        /// <summary>
         /// Create a new instance of Patient and then push it to the database,the inline table
         /// sex is determent by the number, can it be divided by 2 or not ?
         /// </summary>
         public void CreatePatients()
-        { 
-            IPatient[] arrayOfPatient = new InLine[30];
+        {
+
+            EventHandler.SimStarts = DateTime.Now;//starts the simulation
+            EventHandler.CancelLoop = false;
+
+            IPatient[] arrayOfPatient = new InLine[5];
             IPatient patient;
             for (int i = 0; i < arrayOfPatient.Length; i++)
             {
@@ -41,7 +43,7 @@ namespace KrankenHause
             }
             Context.PushToDataBase(arrayOfPatient.ToList(), new InLine());//<<--push it to the inline table
             //tells the user how meny patients where added and what table, the method can be found in the EventHandler class
-            EventHandler.Call?.Invoke(arrayOfPatient.Length, new InLine());
+            EventHandler.PrintToScreen?.Invoke(arrayOfPatient.Length, new InLine());
         }
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace KrankenHause
 
         public void SortPatientsInDatabase()
         {
-            while (EventHandler.IfEmpty(true))
+            while (!EventHandler.CancelLoop)
             {
                 Thread.Sleep(5000);
                 lock (Thread.CurrentThread)//locks the thread
@@ -72,14 +74,14 @@ namespace KrankenHause
                             Context.RemoveFromDataBase(getSickestInLine,new InLine());
                             Context.PushToDataBase(sickestPatient, new IVA());
                             #endregion
-                            EventHandler.Call?.Invoke(sickestPatient.Count(), new IVA());//<<--- shows how meny patient where moved to IVA table
+                            EventHandler.PrintToScreen?.Invoke(sickestPatient.Count(), new IVA());//<<--- shows how meny patient where moved to IVA table
                         }
                         if(Context.TableRows(new Sanatorium()) < 10)
                         {
                             List<IPatient> getOldestPatientList = Context.GetOldestPatients(new InLine(),Context.TableRows(new Sanatorium()),MaxAllowedSanatoriumRows);
                             Context.PushToDataBase(getOldestPatientList, new Sanatorium());
                             Context.RemoveFromDataBase(getOldestPatientList, new InLine());
-                            EventHandler.Call?.Invoke(getOldestPatientList.Count(), new Sanatorium());
+                            EventHandler.PrintToScreen?.Invoke(getOldestPatientList.Count(), new Sanatorium());
                         }
                     }
                     else if (!Context.TableEmpty(new Sanatorium()))
@@ -90,7 +92,7 @@ namespace KrankenHause
                             List<IPatient> sickPatientList = Context.GetSickestPatients(new Sanatorium(),Context.TableRows(new IVA()),MaxAllowedIVARows);
                             Context.PushToDataBase(sickPatientList, new IVA());
                             Context.RemoveFromDataBase(sickPatientList, new Sanatorium());
-                            EventHandler.Call?.Invoke(sickPatientList.Count(), new IVA());
+                            EventHandler.PrintToScreen?.Invoke(sickPatientList.Count(), new IVA());
                         }
                         
                     }
@@ -102,7 +104,7 @@ namespace KrankenHause
                             List<IPatient> sickPatientList = Context.GetSickestPatients(new InLine(),Context.TableRows(new IVA()),MaxAllowedIVARows);
                             Context.RemoveFromDataBase(sickPatientList, new InLine());
                             Context.PushToDataBase(sickPatientList, new IVA());
-                            EventHandler.Call?.Invoke(sickPatientList.Count(), new IVA());
+                            EventHandler.PrintToScreen?.Invoke(sickPatientList.Count(), new IVA());
                         }
                         if (Context.TableRows(new Sanatorium()) < 10)
                         {
@@ -110,14 +112,15 @@ namespace KrankenHause
                             List<IPatient> getOldestPatientList = Context.GetOldestPatients(new InLine(),Context.TableRows(new Sanatorium()),MaxAllowedSanatoriumRows);
                             Context.PushToDataBase(getOldestPatientList, new Sanatorium());
                             Context.RemoveFromDataBase(getOldestPatientList, new InLine());
-                            EventHandler.Call?.Invoke(getOldestPatientList.Count(),new Sanatorium());
+                            EventHandler.PrintToScreen?.Invoke(getOldestPatientList.Count(),new Sanatorium());
                         }
                     }
                     else
                     {
                         //if sanatorium, iva and Inline are empty we go here
-                        //EventHandler.RunOrStop?.Invoke(false);
-                        //EventHandler.TimeForSim?.Invoke(DateTime.Now);
+                       
+                        EventHandler.GrabTime?.Invoke(DateTime.Now);
+                        EventHandler.StopSimulation?.Invoke(true);
                     }
                 }
                
@@ -131,7 +134,7 @@ namespace KrankenHause
         /// </summary>
         public void UpdateSymtomsLevel()
         {
-            while (EventHandler.IfEmpty(true))
+            while (!EventHandler.CancelLoop)
             {
                 Thread.Sleep(3000);
                 lock (Thread.CurrentThread)
@@ -155,7 +158,7 @@ namespace KrankenHause
         
         public void SortToAfterLifeOrRecovered()
         {
-            while (EventHandler.IfEmpty(true))
+            while (!EventHandler.CancelLoop)
             {
                 Thread.Sleep(5000);
                 lock (Thread.CurrentThread)
@@ -175,12 +178,12 @@ namespace KrankenHause
                         #region write to file and show how ment patients where added
                         if (AfterLife.Count() > 0)
                         {
-                            EventHandler.Call?.Invoke(AfterLife.Count(), new AfterLife());
+                            EventHandler.PrintToScreen?.Invoke(AfterLife.Count(), new AfterLife());
                             EventHandler.LogToFile?.Invoke(AfterLife, new AfterLife());
                         }
                         if (Recovery.Count() > 0)
                         {
-                            EventHandler.Call?.Invoke(Recovery.Count(), new Recovered());
+                            EventHandler.PrintToScreen?.Invoke(Recovery.Count(), new Recovered());
                             EventHandler.LogToFile?.Invoke(Recovery, new Recovered());
                         }
                         #endregion
@@ -196,14 +199,14 @@ namespace KrankenHause
                         {
                             Context.RemoveFromDataBase(AfterLife, new Sanatorium());
                             Context.PushToDataBase(AfterLife, new AfterLife());
-                            EventHandler.Call?.Invoke(AfterLife.Count(), new AfterLife());
+                            EventHandler.PrintToScreen?.Invoke(AfterLife.Count(), new AfterLife());
                             EventHandler.LogToFile?.Invoke(AfterLife, new AfterLife());
                         }
                         if(Recovery.Count() > 0)
                         {
                             Context.RemoveFromDataBase(Recovery, new Sanatorium());
                             Context.PushToDataBase(Recovery, new Recovered());
-                            EventHandler.Call?.Invoke(Recovery.Count(), new Recovered());
+                            EventHandler.PrintToScreen?.Invoke(Recovery.Count(), new Recovered());
                             EventHandler.LogToFile?.Invoke(Recovery, new Recovered());
                         }
                         #endregion
@@ -211,5 +214,7 @@ namespace KrankenHause
                 }
             }
         }
+
+      
     }
 }

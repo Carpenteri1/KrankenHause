@@ -4,7 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+/*Author: Niclas Timle
+ *Date: 07-04-2020
+ *Campus Varberg Sut-19 
+ */
 namespace KrankenHause
 {
     class Program
@@ -12,14 +15,13 @@ namespace KrankenHause
         ThreadClass threads = new ThreadClass();
         Program()
         {
-            //kolla tid och stop, 
+            //kolla tid och stoppa loopen, 
 
-            EventHandler.Time = DateTime.Now;
             #region listener to event added
-            EventHandler.Call += EventHandler.PatientAdded;
+            EventHandler.PrintToScreen +=EventHandler.PatientAdded;
             EventHandler.LogToFile += EventHandler.StartToLog;
-            EventHandler.RunOrStop += EventHandler.IfEmpty;
-            EventHandler.TimeForSim += EventHandler.TimeTaken;
+            EventHandler.GrabTime += EventHandler.TimeTaken;
+            EventHandler.StopSimulation += EventHandler.StopOrRun;
             #endregion
 
             #region creating first thread and run it
@@ -53,6 +55,7 @@ namespace KrankenHause
             fourthThread.Start();
             Console.WriteLine($"{fourthThread.Name} isAlive {fourthThread.IsAlive}  ");
             #endregion
+
         }
         static void Main(string[] args)
         {

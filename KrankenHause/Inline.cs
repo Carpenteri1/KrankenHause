@@ -33,7 +33,7 @@ namespace KrankenHause
 
         public override string ToString()
         {
-            return base.ToString();
+            return $"Firstname: {FirstName} LastName: {LastName} Age: {Age} ID{SocialSecurityNum.ToString("yyyy/MM/dd")}-{SocialSecurityNum} SymtomLevel: {SymtomsLevel}";
         }
     }
 }

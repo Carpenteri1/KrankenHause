@@ -10,33 +10,33 @@ namespace KrankenHause
     {
         public delegate void ChangesMadeToDataBase(int ammount, IPatient toTable);
         public delegate void LogFile(List<IPatient> patients, IPatient type);
-        public delegate bool WillRunOrStop(bool willRun);
-        public delegate void TimeForSimulation(DateTime time);
+        public delegate void StopOrRunSim(bool willRun);
+        public delegate void ShowTime(DateTime time);
 
-        private static event TimeForSimulation timeForSim;
-        private static event WillRunOrStop willRun;
         private static event ChangesMadeToDataBase AddedToDatabase;
         private static event LogFile WriteToFile;
+        private static event ShowTime TimeOfSimulation;
+        private static StopOrRunSim Stop; 
 
-        public static DateTime Time { get; set; }
+        public static TimeSpan TimeSpan { get; set; }
+        public static DateTime SimStarts { get; set; }
+        public static bool CancelLoop { get; set; }
+        public static StopOrRunSim StopSimulation { get; set; }
+        public static ChangesMadeToDataBase PrintToScreen { get; set; }
+        public static ShowTime GrabTime { get; set; }
 
-        public static TimeSpan AmmountOfTime { get; set; }
-
-        public static TimeForSimulation TimeForSim { get; set; }
         public static LogFile LogToFile { get; set; }
-        public static ChangesMadeToDataBase Call { get; set; }
-        public static WillRunOrStop RunOrStop { get; set; }
-
-        public static bool IfEmpty(bool willRun)
-        {
-            return willRun;
-        }
-
 
         public static void TimeTaken(DateTime time)
         {
-            AmmountOfTime = time.Subtract(Time);
-            Console.WriteLine($"Time: {AmmountOfTime.ToString("HH:mm:ss")}");
+            TimeSpan = DateTime.Now - SimStarts;
+            Console.WriteLine($"Simulation ended!" +
+                $"\nTime: {TimeSpan.ToString(@"hh\:mm\:ss")}\nPress any key to exit");
+        }
+
+        public static void StopOrRun(bool willRun)
+        {
+           CancelLoop = willRun;
         }
 
         public static void StartToLog(List<IPatient>thelist,IPatient whatType)
